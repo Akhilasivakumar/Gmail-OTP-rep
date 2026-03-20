@@ -1,0 +1,88 @@
+name: CI - Run Cucumber Tests on Merge to Main
+
+# Trigger: runs whenever a push is made to the main branch (i.e., after a PR is merged)
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 4 * * *'  # Run at 4:00 PM UTC every day
+  workflow_dispatch:      # Allows manual triggering from the GitHub Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Playwright + Cucumber Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js (match your local version)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. Install project dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Install Playwright browsers (Chromium, Firefox, WebKit)
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(npx playwright --version | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      # 5. Create the .env file from GitHub Secrets
+      #    Go to: GitHub Repo → Settings → Secrets and variables → Actions
+      #    Add each secret (e.g., BASE_URL, USER_EMAIL, GMAIL_CLIENT_ID, etc.) there
+      - name: Create .env file
+        run: |
+          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
+          echo "USER_EMAIL=${{ secrets.USER_EMAIL }}" >> .env
+          echo "GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}" >> .env
+          echo "GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}" >> .env
+          echo "GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}" >> .env
+          echo "TIMEOUT=${{ secrets.TIMEOUT }}" >> .env
+          echo "BROWSER=${{ secrets.BROWSER }}" >> .env
+          echo "HEADLESS=true" >> .env
+
+      # 6. Run the Cucumber tests
+      - name: Run Cucumber tests
+        run: npm test
+
+      # 7. Upload the HTML + JSON test reports as artifacts
+      #    You can download them from the GitHub Actions run page after the job completes
+      - name: Upload test reports
+        if: always()   # upload even if tests fail, so you can debug
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-test-reports
+          path: test-output/reports/
+          retention-days: 14

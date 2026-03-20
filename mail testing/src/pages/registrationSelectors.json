@@ -1,0 +1,14 @@
+{
+    "password": "input[name=\"password\"], #password, [autocomplete=\"new-password\"], [aria-label*=\"password\" i]",
+    "firstName": "input[name=\"firstName\"], #firstName, [autocomplete=\"given-name\"], [aria-label*=\"first name\" i], input[placeholder*=\"First Name\" i]",
+    "lastName": "input[name=\"lastName\"], #lastName, [autocomplete=\"family-name\"], [aria-label*=\"last name\" i], input[placeholder*=\"Last Name\" i]",
+    "birthdayDay": "#ulp-birthday-dd",
+    "birthdayMonth": "#ulp-birthday-mm",
+    "birthdayYear": "#ulp-birthday-yyyy",
+    "countryCodeDropdown": "select[name*=\"country\" i], select#ulp-country-code, .nrl-mobile-country-code, #ulp-country-code, .iti__selected-flag",
+    "countryCodeSearch": "input[placeholder*=\"search\" i], input[type=\"text\"], .iti__search",
+    "mobileNumber": "input[placeholder*=\"XXXX XXX XXX\"], input[type=\"tel\"], [autocomplete=\"tel\"], [aria-label*=\"mobile\" i]",
+    "subscribe": "input[type=\"checkbox\"], [name*=\"subscribe\" i], [id*=\"subscribe\" i], label:has-text(\"Rugby League\")",
+    "nextButton": "button[name=\"action\"][value=\"default\"], button:has-text(\"Next\")",
+    "skipButton": "button:has-text(\"Skip\"), a:has-text(\"Skip\"), [data-testid*=\"skip\" i], .skip-link"
+}

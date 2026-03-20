@@ -1,0 +1,14 @@
+{
+    "password": "Secure@123!",
+    "firstName": "Akhila",
+    "lastName": "Siva",
+    "birthday": {
+        "day": "28",
+        "month": "02",
+        "year": "2002"
+    },
+    "mobile": {
+        "number": "7339461209"
+    },
+    "subscribe": true
+}
